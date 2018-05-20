@@ -3,6 +3,7 @@ library(ggplot2)
 library(grid)
 library(gridExtra)
 library(bnlearn)
+library(reshape2)
 
 dataFull <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/communities/communities.data", sep=',')
 #names<- readLines("https://archive.ics.uci.edu/ml/machine-learning-databases/communities/communities.names")
@@ -35,3 +36,24 @@ varImportance <- data.frame(Variables = row.names(importance), Importance = roun
 
 View(varImportance)
 
+imporatnt_variables = varImportance[which(varImportance$Importance>0.02),]
+
+data_autoselect = data[,c(imporatnt_variables$Variables)]
+
+cormat <- round(cor(data_autoselect),2)
+
+melted_cormat <- melt(cormat)
+
+melted_cormat$value<- abs(melted_cormat$value)
+
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+mean(melted_cormat$value)
+median(melted_cormat$value)
