@@ -30,6 +30,8 @@ dataTrainVariables$ViolentCrimesPerPop<-NULL
 
 rf_model<-randomForest(x = dataTrainVariables, y =dataTrain$ViolentCrimesPerPop)
 
+rfcv(dataTrainVariables,dataTrain$ViolentCrimesPerPop)
+
 importance    <- importance(rf_model)
 print(importance)
 varImportance <- data.frame(Variables = row.names(importance), Importance = round(importance[ ,'IncNodePurity'],2))
@@ -39,6 +41,8 @@ View(varImportance)
 imporatnt_variables = varImportance[which(varImportance$Importance>0.02),]
 
 data_autoselect = data[,c(imporatnt_variables$Variables)]
+
+data_autoselect$ViolentCrimesPerPop = data$ViolentCrimesPerPop
 
 cormat <- round(cor(data_autoselect),2)
 
