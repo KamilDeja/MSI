@@ -12,3 +12,22 @@ dag.test = hc(data_auto_train)
 plot(dag.test)
 
 bn.cv(data_autoselect, dag.test, loss = "mse-lw" , loss.args = list(target = 'ViolentCrimesPerPop' ))
+
+
+#############Discretize#############
+
+summary(data_autoselect$NumStreet)
+boxplot(data_autoselect$NumInShelters)
+
+data_autoselect = data_autoselect[,!names(data_autoselect) %in% c('NumInShelters')]
+
+data_autoselect_discrete<-discretize(data_autoselect,method = 'quantile')
+
+
+dag.test_descrete = hc(data_autoselect_discrete)
+bn.cv(data_autoselect_discrete, dag.test_descrete, loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop' ))
+
+bn_descrete_fitted = bn.fit(dag.test_descrete,data_autoselect_discrete)
+plot(bn_descrete_fitted$racePctWhite$parents)
+
+plot(dag.test_descrete)

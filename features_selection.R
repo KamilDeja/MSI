@@ -44,6 +44,7 @@ imporatnt_variables = varImportance[which(varImportance$Importance>0.02),]
 
 data_autoselect = data[,c(imporatnt_variables$Variables)]
 
+data_autoselect$communityname<-NULL
 data_autoselect$ViolentCrimesPerPop = data$ViolentCrimesPerPop
 
 cormat <- round(cor(data_autoselect),2)
@@ -54,12 +55,19 @@ melted_cormat$value<- abs(melted_cormat$value)
 
 ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
   geom_tile()+
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+  theme(axis.text.x = element_text(angle = 90, hjust =1),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank())
+#  theme(axis.title.x=element_blank(),
+#        axis.text.x=element_blank(),
+#        axis.ticks.x=element_blank(),
+#        axis.title.y=element_blank(),
+#        axis.text.y=element_blank(),
+#        axis.ticks.y=element_blank())
 
 mean(melted_cormat$value)
 median(melted_cormat$value)
+
+
+####Jako że NumStreet~NumInShelters (a oprócz tego potem sie wywala :D)
+data_autoselect$NumStreet<-NULL
