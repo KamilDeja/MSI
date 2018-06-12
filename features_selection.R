@@ -30,7 +30,7 @@ dataTrainVariables <- dataTrain[,5:106]
 dataTrainVariables$ViolentCrimesPerPop<-NULL
 
 
-rf_model<-randomForest(x = dataTrainVariables, y =dataTrain$ViolentCrimesPerPop)
+rf_model<-randomForest(x = dataTrainVariables, y =dataTrain$ViolentCrimesPerPop,set.seed(1234))
 
 rfcv(dataTrainVariables,dataTrain$ViolentCrimesPerPop)
 
