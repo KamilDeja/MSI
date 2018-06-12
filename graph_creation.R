@@ -22,7 +22,7 @@ boxplot(data_autoselect$NumInShelters)
 data_autoselect = data_autoselect[,!names(data_autoselect) %in% c('NumInShelters')]
 
 data_autoselect_discrete<-discretize(data_autoselect,method = 'quantile')
-discrete_uqniue_count <- apply(data_autoselect_discrete, 2, function(x) length(unique(x)))
+discrete_unique_count <- apply(data_autoselect_discrete, 2, function(x) length(unique(x)))
 
 dag.test_descrete = hc(data_autoselect_discrete)
 bn.cv(data_autoselect_discrete, dag.test_descrete, loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop' ))
