@@ -43,8 +43,6 @@ View(varImportance)
 imporatnt_variables = varImportance[which(varImportance$Importance>0.02),]
 
 data_autoselect = data[,c(imporatnt_variables$Variables)]
-
-data_autoselect$communityname<-NULL
 data_autoselect$ViolentCrimesPerPop = data$ViolentCrimesPerPop
 
 cormat <- round(cor(data_autoselect),2)
@@ -71,3 +69,26 @@ median(melted_cormat$value)
 
 ####Jako że NumStreet~NumInShelters (a oprócz tego potem sie wywala :D)
 data_autoselect$NumStreet<-NULL
+
+
+
+
+
+rf_model<-randomForest(x =  data_autoselect_discrete[,-which(colnames(data_autoselect_discrete) %in% c('ViolentCrimesPerPop'))], y =data_autoselect_discrete$ViolentCrimesPerPop,set.seed(1234))
+
+
+cv_rf = rfcv(data_autoselect_discrete[,-which(colnames(data_autoselect_discrete) %in% c('ViolentCrimesPerPop'))],data_autoselect_discrete$ViolentCrimesPerPop)
+
+cv_rf$error.cv
+
+importance    <- importance(rf_model)
+print(importance)
+varImportance <- data.frame(Variables = row.names(importance), Importance = round(importance[ ,'IncNodePurity'],2))
+
+View(varImportance)
+
+imporatnt_variables = varImportance[which(varImportance$Importance>0.02),]
+
+
+data_autoselect = data[,c(imporatnt_variables$Variables)]
+data_autoselect$ViolentCrimesPerPop = data$ViolentCrimesPerPop
