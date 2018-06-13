@@ -4,6 +4,7 @@ library(grid)
 library(gridExtra)
 library(bnlearn)
 library(reshape2)
+library(Rgraphviz)
 
 set.seed(1234)
 
@@ -42,8 +43,12 @@ View(varImportance)
 
 imporatnt_variables = varImportance[which(varImportance$Importance>0.02),]
 
-data_autoselect = data[,c(imporatnt_variables$Variables)]
+data_autoselect = data[,which(colnames(data) %in% imporatnt_variables$Variables)]
 data_autoselect$ViolentCrimesPerPop = data$ViolentCrimesPerPop
+
+data_autoselect
+colnames(data_autoselect)
+imporatnt_variables$Variables
 
 cormat <- round(cor(data_autoselect),2)
 
