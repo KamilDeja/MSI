@@ -246,4 +246,4 @@ cv_manual
 
 c(cv_manual[[1]]$loss)
 
-bn.fit()
+bn.fit()bn.fit()
