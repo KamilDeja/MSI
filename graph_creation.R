@@ -172,8 +172,12 @@ manual_dag=set.arc(manual_dag,'HousVacant','ViolentCrimesPerPop')
 node.ordering(manual_dag)
 
 #manual_dag=node
+att<-getDefaultAttrs()
+graph.par(list(node=list(textCol="black", fonsize=30, shape="box"),
+               fixedsize=FALSE, height=1, width=2))
 graphviz.plot(manual_dag,layout = 'fdp')
 
+<<<<<<< HEAD
 
 
 
@@ -246,4 +250,20 @@ cv_manual
 
 c(cv_manual[[1]]$loss)
 
-bn.fit()bn.fit()
+bn.fit()
+=======
+part <- data_autoselect[,-which(colnames(data_autoselect) %in% c("PopDens","PctEmploy","MedOwnCostPctInc","PctOccupMgmtProf","MedRentPctHousInc","LemasPctOfficDrugUn","PctPersOwnOccup","pctWRetire","pctWInvInc","MedYrHousBuilt","PctLargHouseFam","PctHousOccup"))]
+cv_manual = bn.cv(part, manual_dag, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop', set.seed(1234)))
+cv_manual
+
+from <- c("PctImmigRec8", "PctImmigRec5", "PctRecImmig10")
+to <- c("pctWPubAsst", "PctIlleg")
+for (i in 1:3) {
+  for (j in 1:2) {
+    f <- from[i]
+    t <- to[j]
+    print(dsep(manual_dag, f, t, c("racePctHisp", "PctRecImmig5", "racePctWhite")))
+    print(dsep(manual_dag, t, f, c("racePctHisp", "PctRecImmig5", "racePctWhite")))
+  }
+}
+>>>>>>> d81fdd00cc60592962f039ca4ae5c5b775b0efb7
