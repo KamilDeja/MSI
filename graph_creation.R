@@ -19,9 +19,18 @@ plot(dag_tabu)
 
 plot(dag_rsmax)
 
+plot(dag_rand)
+
+dag_rand = random.graph(colnames(data_auto_net))
+
 cv_hc = bn.cv(data_auto_test, dag_hc, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop', set.seed(1234)))
 cv_tabu = bn.cv(data_auto_test, dag_tabu, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
 cv_rsmax = bn.cv(data_auto_test, dag_rsmax, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
+
+bn.cv(data_auto_test, dag_rand, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
+
+graphviz.compare(dag_hc, dag_tabu,layout='fdp')
+graphviz.plot(dag_tabu,layout='fdp')
 
 cv_hc
 cv_tabu
@@ -30,9 +39,9 @@ cv_rsmax
 
 #############Discretize#############
 
-data_autoselect = data_autoselect[,!names(data_autoselect) %in% c('NumInShelters','NumStreet')]
+data_autoselect = data_autoselect[,!names(data_autoselect) %in% c('NumIlleg','NumStreet','NumInShelters','LemasPctOfficDrugUn')]
 
-nr_breaks = rep(3,ncol(data_autoselect))
+nr_breaks = rep(2,ncol(data_autoselect))
 nr_breaks[which(colnames(data_autoselect) %in% c('racePctHisp','HousVacant'))]=4
   
   
@@ -46,6 +55,7 @@ discrete_unique_count
 data_auto_net_discrete <- data_autoselect_discrete[sample,]
 data_auto_test_discrete <-data_autoselect_discrete[-sample,]
 
+
 dag_hc_discrete = hc(data_auto_net_discrete,whitelist = data.frame('PctFam2Par',"ViolentCrimesPerPop"))
 
 dag_tabu_discrete = tabu(data_auto_net_discrete,whitelist = data.frame('PctFam2Par',"ViolentCrimesPerPop"))
@@ -58,15 +68,17 @@ plot(dag_tabu_discrete)
 
 plot(dag_rsmax_discrete)
 
+
 cv_hc_discrete = bn.cv(data_auto_test_discrete, dag_hc_discrete,fit='bayes', loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop', set.seed(1234)))
-cv_tabu_discrete = bn.cv(data_auto_test_discrete, dag_tabu_discrete, loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
-cv_rsmax_discrete = bn.cv(data_auto_test_discrete, dag_rsmax_discrete, loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
+cv_tabu_discrete = bn.cv(data_auto_test_discrete, dag_tabu_discrete,fit='bayes', loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
+cv_rsmax_discrete = bn.cv(data_auto_test_discrete, dag_rsmax_discrete,fit='bayes', loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
+cv_manual_discrete = bn.cv(data_auto_test_discrete, manual_dag_d,fit='bayes', loss = "pred" , loss.args = list(target = 'ViolentCrimesPerPop',set.seed(1234)))
 
+#cv_hc_discrete[[1]]$observed
 cv_hc_discrete
-
-cv_hc_discrete[[1]]$observed
 cv_tabu_discrete
 cv_rsmax_discrete
+cv_manual_discrete
 
 View(data_auto_test_discrete)
 
@@ -88,11 +100,19 @@ att$node$fontsize=25
 
 
 setAttrs(att)
-graph.par(list(nodes=list(fill="lightgray", textCol="black",fontsize=45)))
+graph.par(list(nodes=list(fill="black", textCol="black",fontsize=25,lwd=2,size=80)))
+graphviz.compare(dag_hc, dag_tabu,layout='fdp',shape='rectangle')
+
+graphviz.plot(dag_hc,layout = 'fdp',shape='rectangle')
+graphviz.plot(dag_rsmax)
+
+graph.par(list(edges=list(col="blue",lwd=2)))
 graphviz.plot(dag_rsmax)
 graphviz.plot(dag_tabu)
-graphviz.plot(dag_hc,layout = 'fdp')
+graphviz.plot(manual_dag,layout = 'fdp',shape='rectangle')
+
 plot(dag_hc)
+?graphviz.plot
 
 
 ################################## Create maual graph ##################3
@@ -119,9 +139,9 @@ manual_dag=set.arc(manual_dag,'PersPerOwnOccHous','PctHousOwnOcc')
 
 manual_dag=set.arc(manual_dag,'NumInShelters','NumStreet')
 manual_dag=set.arc(manual_dag,'pctWPubAsst','NumStreet')
-manual_dag=set.arc(manual_dag,'NumInShelters','NumStreet')
-manual_dag=set.arc(manual_dag,'pctWWage','NumStreet')
-manual_dag=set.arc(manual_dag,'PctPersDenseHous','NumStreet')
+manual_dag = set.arc(manual_dag, 'NumInShelters', 'NumStreet')
+manual_dag = set.arc(manual_dag, 'pctWWage', 'NumStreet')
+manual_dag = set.arc(manual_dag, 'PctPersDenseHous', 'NumStreet')
 
 
 
@@ -155,5 +175,75 @@ node.ordering(manual_dag)
 graphviz.plot(manual_dag,layout = 'fdp')
 
 
-cv_manual = bn.cv(data_autoselect, manual_dag, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop', set.seed(1234)))
+
+
+
+
+
+
+nodes = colnames(data_autoselect_discrete)
+nodes = nodes[-which(nodes %in% c("PopDens","PctEmploy","MedOwnCostPctInc","PctOccupMgmtProf","MedRentPctHousInc","LemasPctOfficDrugUn","PctPersOwnOccup","pctWRetire","pctWInvInc","MedYrHousBuilt","PctLargHouseFam","PctHousOccup"))]
+manual_dag_d = empty.graph(nodes)
+#dag_string = modelstring(manual_dag_d)
+#dag_string ="[racePctWhite][racePctHisp][pctWWage][pctWInvInc][pctWPubAsst][pctWRetire][PctUnemployed][PctEmploy][PctOccupMgmtProf][PctFam2Par][PctKids2Par][PctYoungKids2Par][PctTeen2Par][PctWorkMomYoungKids][PctWorkMom][NumIlleg][PctIlleg][PctImmigRec5][PctImmigRec8][PctRecImmig5][PctRecImmig10][PctLargHouseFam][PersPerOwnOccHous][PctPersOwnOccup][PctPersDenseHous][HousVacant][PctHousOccup][PctHousOwnOcc][MedYrHousBuilt][MedRentPctHousInc][MedOwnCostPctInc][NumInShelters][NumStreet][PopDens][LemasPctOfficDrugUn][ViolentCrimesPerPop]"
+manual_dag_d=set.arc(manual_dag_d,'PctTeen2Par','PctFam2Par')
+#manual_dag_d=set.arc(manual_dag_d,'NumStreet','NumInShelters')
+#manual_dag_d=set.arc(manual_dag_d,'MedRent','PctHousOwnOcc')
+manual_dag_d=set.arc(manual_dag_d,'PctKids2Par','PctTeen2Par')
+manual_dag_d=set.arc(manual_dag_d,'PctUnemployed','NumInShelters')
+manual_dag_d=set.arc(manual_dag_d,'PctWorkMom','PctFam2Par')
+manual_dag_d=set.arc(manual_dag_d,'PctWorkMomYoungKids','PctWorkMom')
+manual_dag_d=set.arc(manual_dag_d,'PctYoungKids2Par','PctKids2Par')
+#manual_dag_d=set.arc(manual_dag_d,'RentMedian','PctHousOwnOcc')
+manual_dag_d=set.arc(manual_dag_d,'PersPerOwnOccHous','PctHousOwnOcc')
+#manual_dag_d=set.arc(manual_dag_d,'RentMedian','HousVacant')
+#manual_dag_d=set.arc(manual_dag_d,'MedRent','HousVacant')
+
+
+#manual_dag_d=set.arc(manual_dag_d,'NumInShelters','NumInShelters')
+manual_dag_d=set.arc(manual_dag_d,'pctWPubAsst','NumInShelters')
+manual_dag_d = set.arc(manual_dag_d, 'NumInShelters', 'NumInShelters')
+manual_dag_d = set.arc(manual_dag_d, 'pctWWage', 'NumInShelters')
+manual_dag_d = set.arc(manual_dag_d, 'PctPersDenseHous', 'NumInShelters')
+
+
+
+manual_dag_d=set.arc(manual_dag_d,'racePctHisp','PctIlleg')
+manual_dag_d=set.arc(manual_dag_d,'pctWPubAsst','PctIlleg')
+manual_dag_d=set.arc(manual_dag_d,'racePctWhite','PctIlleg')
+
+manual_dag_d=set.arc(manual_dag_d,'PctRecImmig5','racePctHisp')
+manual_dag_d=set.arc(manual_dag_d,'PctRecImmig5','pctWPubAsst')
+manual_dag_d=set.arc(manual_dag_d,'PctRecImmig5','racePctWhite')
+
+
+manual_dag_d=set.arc(manual_dag_d,'PctRecImmig10','PctRecImmig5')
+manual_dag_d=set.arc(manual_dag_d,'PctImmigRec5','PctRecImmig5')
+manual_dag_d=set.arc(manual_dag_d,'PctImmigRec8','PctRecImmig5')
+manual_dag_d=set.arc(manual_dag_d,'PctRecImmig5','PctIlleg')
+manual_dag_d=set.arc(manual_dag_d,'NumIlleg','PctIlleg')
+
+
+manual_dag_d=set.arc(manual_dag_d,'HousVacant','ViolentCrimesPerPop')
+manual_dag_d=set.arc(manual_dag_d,'PctHousOwnOcc','ViolentCrimesPerPop')
+manual_dag_d=set.arc(manual_dag_d,'PctFam2Par','ViolentCrimesPerPop')
+manual_dag_d=set.arc(manual_dag_d,'PctIlleg','ViolentCrimesPerPop')
+manual_dag_d=set.arc(manual_dag_d,'NumInShelters','ViolentCrimesPerPop')
+manual_dag_d=set.arc(manual_dag_d,'PctKids2Par','ViolentCrimesPerPop')
+manual_dag_d=set.arc(manual_dag_d,'HousVacant','ViolentCrimesPerPop')
+
+node.ordering(manual_dag_d)
+
+#manual_dag_d=node
+graphviz.plot(manual_dag_d,layout = 'fdp')
+
+cv_manual = bn.cv(data_autoselect, manual_dag_d, loss = "mse" , loss.args = list(target = 'ViolentCrimesPerPop', set.seed(1234)))
 cv_manual
+
+c('PctFam2Par','PctKids2Par','NumStreet','PctIlleg')
+
+cv_manual
+
+c(cv_manual[[1]]$loss)
+
+bn.fit()
